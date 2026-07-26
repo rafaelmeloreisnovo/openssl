@@ -26,7 +26,7 @@ else
 HOST_ASM :=
 endif
 
-.PHONY: all kat kat-c freestanding audit audit-host audit-cross cross probe clean
+.PHONY: all kat kat-c evp-kat freestanding audit audit-host audit-cross cross probe clean
 all: kat-c kat freestanding cross audit
 
 $(BUILD):
@@ -48,6 +48,12 @@ else
 		-o $(BUILD)/rmr_kat_$(HOST_ARCH)
 	$(BUILD)/rmr_kat_$(HOST_ARCH)
 endif
+
+evp-kat: | $(BUILD)
+	$(CC) $(COMMON_WARN) $(COMMON_OPT) $(POLICY_DEFS) $(INC) \
+		$(CORE) tools/openssl_evp_kat.c -lcrypto \
+		-o $(BUILD)/rmr_openssl_evp_kat
+	$(BUILD)/rmr_openssl_evp_kat
 
 freestanding: | $(BUILD)
 	$(CC) $(COMMON_WARN) $(COMMON_OPT) $(FREESTANDING) $(FREESTANDING_DEFS) \
