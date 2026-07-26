@@ -204,13 +204,13 @@ RMR_TEXT void rmr_secure_zero(void *ptr, rmr_size len)
     }
 }
 
-/* Immutable template retained by the linker. */
+/* Immutable zero-capability template retained by the linker. */
 static const struct rmr_silicon_manifest g_rmr_manifest RMR_MANIFEST = {
     RMR_SILICON_MAGIC,
     RMR_SILICON_ABI_VERSION,
     0u,
     0u,
-    0x6f7e5b9cu,
+    0xf11a0efau,
     0u
 };
 
