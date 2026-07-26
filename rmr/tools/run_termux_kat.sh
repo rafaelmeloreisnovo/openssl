@@ -12,7 +12,7 @@ need()
     }
 }
 
-for tool in make cc nm readelf sha256sum uname sed; do
+for tool in make cc nm readelf sha256sum uname sed date dirname; do
     need "$tool"
 done
 
