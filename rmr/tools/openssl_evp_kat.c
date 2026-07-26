@@ -4,6 +4,7 @@
  */
 #include <stdio.h>
 #include <string.h>
+#include <openssl/crypto.h>
 #include <openssl/evp.h>
 #include <openssl/provider.h>
 #include "../include/rmr_silicon.h"
@@ -14,6 +15,7 @@ static int from_hex(unsigned char *out, size_t out_len, const char *hex)
 
     for (i = 0; i < out_len; ++i) {
         unsigned int value;
+
         if (sscanf(hex + (i * 2u), "%2x", &value) != 1)
             return 0;
         out[i] = (unsigned char)value;
@@ -24,7 +26,8 @@ static int from_hex(unsigned char *out, size_t out_len, const char *hex)
 static const char *md_provider_name(const EVP_MD *md)
 {
     const OSSL_PROVIDER *provider = EVP_MD_get0_provider(md);
-    const char *name = provider != NULL ? OSSL_PROVIDER_get0_name(provider) : NULL;
+    const char *name =
+        provider != NULL ? OSSL_PROVIDER_get0_name(provider) : NULL;
 
     return name != NULL ? name : "TOKEN_VAZIO";
 }
@@ -32,7 +35,8 @@ static const char *md_provider_name(const EVP_MD *md)
 static const char *cipher_provider_name(const EVP_CIPHER *cipher)
 {
     const OSSL_PROVIDER *provider = EVP_CIPHER_get0_provider(cipher);
-    const char *name = provider != NULL ? OSSL_PROVIDER_get0_name(provider) : NULL;
+    const char *name =
+        provider != NULL ? OSSL_PROVIDER_get0_name(provider) : NULL;
 
     return name != NULL ? name : "TOKEN_VAZIO";
 }
@@ -54,7 +58,8 @@ static int digest_kat(const char *algorithm, const char *expected_hex)
 
     md = EVP_MD_fetch(NULL, algorithm, NULL);
     if (md == NULL) {
-        printf("digest=%s status=TOKEN_VAZIO provider=TOKEN_VAZIO\n", algorithm);
+        printf("digest=%s status=TOKEN_VAZIO provider=TOKEN_VAZIO\n",
+               algorithm);
         goto done;
     }
 
@@ -65,7 +70,8 @@ static int digest_kat(const char *algorithm, const char *expected_hex)
         EVP_DigestFinal_ex(ctx, actual, &actual_len) != 1)
         goto done;
 
-    ok = actual_len == expected_len && memcmp(actual, expected, expected_len) == 0;
+    ok = actual_len == expected_len &&
+         memcmp(actual, expected, expected_len) == 0;
     printf("digest=%s status=%s provider=%s bytes=%u\n",
            algorithm, ok ? "PASS" : "FAIL", md_provider_name(md), actual_len);
 
@@ -80,11 +86,13 @@ static void probe_cipher(const char *algorithm)
     EVP_CIPHER *cipher = EVP_CIPHER_fetch(NULL, algorithm, NULL);
 
     if (cipher == NULL) {
-        printf("cipher=%s status=TOKEN_VAZIO provider=TOKEN_VAZIO\n", algorithm);
+        printf("cipher=%s status=TOKEN_VAZIO provider=TOKEN_VAZIO\n",
+               algorithm);
         return;
     }
 
-    printf("cipher=%s status=AVAILABLE provider=%s key_bits=%d block_bytes=%d\n",
+    printf("cipher=%s status=AVAILABLE provider=%s "
+           "key_bits=%d block_bytes=%d\n",
            algorithm,
            cipher_provider_name(cipher),
            EVP_CIPHER_get_key_length(cipher) * 8,
