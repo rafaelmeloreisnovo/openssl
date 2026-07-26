@@ -73,25 +73,32 @@ function(rmr_apply_optimization target)
   if(_rmr_profile STREQUAL "host-native")
     target_compile_options(${target} PRIVATE
       $<$<COMPILE_LANG_AND_ID:C,GNU,Clang,AppleClang>:-march=native>
-      $<$<COMPILE_LANG_AND_ID:C,GNU,Clang,AppleClang>:-mtune=native>)
+      $<$<COMPILE_LANG_AND_ID:C,GNU,Clang,AppleClang>:-mtune=native>
+      $<$<COMPILE_LANGUAGE:ASM>:-march=native>)
   elseif(_rmr_profile STREQUAL "x86_64-v3")
     target_compile_options(${target} PRIVATE
-      $<$<COMPILE_LANG_AND_ID:C,GNU,Clang,AppleClang>:-march=x86-64-v3>)
+      $<$<COMPILE_LANG_AND_ID:C,GNU,Clang,AppleClang>:-march=x86-64-v3>
+      $<$<COMPILE_LANGUAGE:ASM>:-march=x86-64-v3>)
   elseif(_rmr_profile STREQUAL "aarch64-crypto")
     target_compile_options(${target} PRIVATE
-      $<$<COMPILE_LANG_AND_ID:C,GNU,Clang,AppleClang>:-march=armv8-a+crypto+crc+simd>)
+      $<$<COMPILE_LANG_AND_ID:C,GNU,Clang,AppleClang>:-march=armv8-a+crypto+crc+simd>
+      $<$<COMPILE_LANGUAGE:ASM>:-march=armv8-a+crypto+crc+simd>)
   elseif(_rmr_profile STREQUAL "armv7-neon")
     target_compile_options(${target} PRIVATE
       $<$<COMPILE_LANG_AND_ID:C,GNU,Clang,AppleClang>:-march=armv7-a>
       $<$<COMPILE_LANG_AND_ID:C,GNU,Clang,AppleClang>:-mfpu=neon-vfpv4>
-      $<$<COMPILE_LANG_AND_ID:C,GNU,Clang,AppleClang>:-mfloat-abi=softfp>)
+      $<$<COMPILE_LANG_AND_ID:C,GNU,Clang,AppleClang>:-mfloat-abi=softfp>
+      $<$<COMPILE_LANGUAGE:ASM>:-march=armv7-a>
+      $<$<COMPILE_LANGUAGE:ASM>:-mfpu=neon-vfpv4>
+      $<$<COMPILE_LANGUAGE:ASM>:-mfloat-abi=softfp>)
   elseif(NOT _rmr_profile STREQUAL "portable")
     message(FATAL_ERROR "Unknown RMR_ARCH_PROFILE='${_rmr_profile}'")
   endif()
 
   if(NOT RMR_CPU_TUNE STREQUAL "")
     target_compile_options(${target} PRIVATE
-      $<$<COMPILE_LANG_AND_ID:C,GNU,Clang,AppleClang>:-mtune=${RMR_CPU_TUNE}>)
+      $<$<COMPILE_LANG_AND_ID:C,GNU,Clang,AppleClang>:-mtune=${RMR_CPU_TUNE}>
+      $<$<COMPILE_LANGUAGE:ASM>:-mtune=${RMR_CPU_TUNE}>)
   endif()
 
   if(RMR_ENABLE_IPO)
