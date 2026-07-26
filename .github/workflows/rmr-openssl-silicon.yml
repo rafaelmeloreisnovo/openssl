@@ -1,0 +1,39 @@
+name: RMR OpenSSL silicon contract
+
+on:
+  pull_request:
+    paths:
+      - 'rmr/**'
+      - '.github/workflows/rmr-openssl-silicon.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Toolchain identity
+        run: |
+          cc --version
+          clang --version
+          ld.lld --version
+          readelf --version
+
+      - name: Build and audit isolated RMR layer
+        working-directory: rmr
+        run: sh tools/audit_contract.sh
+
+      - name: Upload evidence receipts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: rmr-openssl-silicon-contract
+          path: |
+            rmr/build/SHA256SUMS
+            rmr/build/receipt.txt
+          if-no-files-found: error
+          retention-days: 30
