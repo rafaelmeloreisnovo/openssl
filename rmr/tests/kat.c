@@ -77,8 +77,15 @@ int main(void)
 
     rmr_silicon_manifest_materialize(&m);
     if (template_m->magic != RMR_SILICON_MAGIC ||
-        m.magic != RMR_SILICON_MAGIC ||
-        m.abi_version != RMR_SILICON_ABI_VERSION)
+        template_m->abi_version != RMR_SILICON_ABI_VERSION ||
+        template_m->compile_caps != 0u ||
+        template_m->build_policy != 0u ||
+        template_m->reserved != 0u ||
+        template_m->manifest_fold != rmr_silicon_manifest_fold(template_m))
+        return 1;
+    if (m.magic != RMR_SILICON_MAGIC ||
+        m.abi_version != RMR_SILICON_ABI_VERSION ||
+        m.reserved != 0u)
         return 1;
     if (m.compile_caps != rmr_silicon_compile_caps() ||
         m.build_policy != rmr_silicon_build_policy() ||
