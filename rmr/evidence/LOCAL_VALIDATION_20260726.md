@@ -17,6 +17,9 @@ sh tools/audit_contract.sh
 make probe
 ```
 
+A lógica corrente do branch foi reconstruída e executada novamente após o
+endurecimento do fold do manifesto e a separação `audit-host`/`audit-cross`.
+
 ## Result
 
 ```text
@@ -27,6 +30,7 @@ freestanding_object=PASS
 cross_arch_linked_objects=PASS
 undefined_symbols=ZERO
 linker_sections=PASS
+immutable_manifest_fold=PASS
 device_execution=TOKEN_VAZIO
 openssl_full_build=TOKEN_VAZIO
 silicon_benchmark=TOKEN_VAZIO
@@ -44,6 +48,9 @@ The `0x80000000` delta records that the architecture-specific ASM symbol was
 linked. The baseline host mask records x86_64, little-endian, 64-bit word and
 SSE2 as compiler-visible capabilities.
 
+The immutable zero-capability template now contains fold `f11a0efa`, derived by
+the same function used for materialized manifests; the KAT rejects any mismatch.
+
 ## Object sizes
 
 ```text
@@ -53,25 +60,42 @@ x86_64 linked:  532 bytes
 host pure C:    439 bytes
 ```
 
-## SHA-256 receipts
+## SHA-256 receipts after manifest hardening
 
 ```text
-0d3d2709c509c87c80c9d1267985998674af6aa3ec660fbf698e7ea32a2b25b8  rmr_core.aarch64.o
-7bd8d3523457b310c51da746b6a381b860f11a16e4d112aeca1f01ab78b191f1  rmr_core.armv7.o
-6ed86f0effa1ecff654f77dde0edab57034a255ef80a9e466855c38f7642acca  rmr_core.x86_64.o
+fa0af44ea085b0bdbe71b7a33b2e8f2c5ab230cda1252ba701329634a8489117  rmr_core.aarch64.o
+738fe00d59e60feb8e25f75222573b0c2f260f9638b36fdc23441cad50fa0069  rmr_core.armv7.o
+7acaae6f968a2fcd386b4c067a9fa8fdd61138e2176dfe8ef031b7e00bbca6ac  rmr_core.x86_64.o
 b3bf6578186dbd8f8d87e9bd02fc74cbb62ace6911b3ddda7a377dca6b987984  rmr_mix32.aarch64.o
 c578e422d4702b60c4910edefdcd5a7749eb7b33d683ea0e2699998594e9fe63  rmr_mix32.armv7.o
 ed0156a518e436fbf4017a04505e9c23dc3f0771da737fde6fe848c5acbc53f0  rmr_mix32.x86_64.o
-25894a7292ad028333d35b750346233b9238c7783114d12f452fe24e15b96dc1  rmr_silicon.aarch64.linked.o
-e168a81d85470e518184654fd97d5b448e41c6f9db2e9324ed3fab50d4a5c9c4  rmr_silicon.armv7.linked.o
-c2f518a957ed3882f188d984528d1a06f05fc5c1e6b61545e99b36d398c7b83e  rmr_silicon.freestanding.o
-7320624ddb0490b5e1c57133c2dd4b23f60ab762758586bb67fa6e1f5dce27a9  rmr_silicon.x86_64.linked.o
-20bf1bd8a5ee29a07ec112fdb00ee515c01e401d00ecdd7c317d882969962625  rmr_kat_c
-73d63b1273f5b07183eda29afd91707da1688471e469f822b668946fbd9b7f8e  rmr_kat_x86_64
+c8c8c7020df825a891a16c6ae04192147a9dd08e736de2218f56e4e03d0bcae7  rmr_silicon.aarch64.linked.o
+7d034511567ca2f0fa3c2d8a912e8668eebd1808419f29fc2b4e866ce0c65be5  rmr_silicon.armv7.linked.o
+339192200f31c5e48736cfe785101d80594878d8d11add0aa4b5bc38ccfa0438  rmr_silicon.freestanding.o
+bfac0fec218f18d7792a27b39daabfb780d0587ba2e0afd24709fa6952f4b9fb  rmr_silicon.x86_64.linked.o
+63184fd9ebe8bc8a8d2a4869ed0ff5b20e9a348811b0d7a5d7edfd7e10b18cab  rmr_kat_c
+9574077599bc15253dc2b3777146657c2055d4def4a2508275393cf68178ab0f  rmr_kat_x86_64
 ```
 
 These hashes are local receipts, not reproducible-build claims: compiler path,
-version, environment and linker can change object bytes.
+version, environment and linker can change object bytes. The GitHub Actions
+artifact remains the independent CI receipt when its current run completes.
+
+## Native Android gate
+
+`tools/run_termux_kat.sh` now performs the host-only subset on the actual
+Android/Termux ABI and emits:
+
+```text
+build/termux_device_receipt.txt
+build/TERMUX_SHA256SUMS
+```
+
+The gate is implemented, but no device receipt is claimed in this validation:
+
+```text
+native_android_execution=TOKEN_VAZIO
+```
 
 ## Public OpenSSL probe
 
