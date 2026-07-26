@@ -26,7 +26,7 @@ else
 HOST_ASM :=
 endif
 
-.PHONY: all kat kat-c freestanding audit cross probe clean
+.PHONY: all kat kat-c freestanding audit audit-host audit-cross cross probe clean
 all: kat-c kat freestanding cross audit
 
 $(BUILD):
@@ -86,18 +86,23 @@ probe: | $(BUILD)
 		$(CORE) tools/openssl_probe.c -lcrypto -o $(BUILD)/rmr_openssl_probe
 	$(BUILD)/rmr_openssl_probe
 
-audit: freestanding
+audit-host: freestanding
 	@echo "== host freestanding undefined symbols (must be empty) =="
 	@test -z "$$($(NM) -u $(BUILD)/rmr_silicon.freestanding.o)"
+	@echo "== host RMR sections =="
+	@$(READELF) -SW $(BUILD)/rmr_silicon.freestanding.o | grep -E '\.rmr\.(text|manifest|rodata)'
+
+audit-cross: cross
 	@echo "== linked cross objects undefined symbols (must be empty) =="
 	@for f in $(BUILD)/rmr_silicon.*.linked.o; do \
 		test -z "$$($(NM) -u $$f)" || { echo "undefined in $$f"; $(NM) -u $$f; exit 1; }; \
 	done
-	@echo "== RMR sections =="
-	@$(READELF) -SW $(BUILD)/rmr_silicon.freestanding.o | grep -E '\.rmr\.(text|manifest|rodata)'
+	@echo "== linked cross RMR sections =="
 	@for f in $(BUILD)/rmr_silicon.*.linked.o; do \
 		$(READELF) -SW $$f | grep -q '\.rmr.text' || exit 1; \
 	done
+
+audit: audit-host audit-cross
 
 clean:
 	rm -rf $(BUILD)
