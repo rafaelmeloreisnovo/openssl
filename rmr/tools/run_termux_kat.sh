@@ -32,6 +32,18 @@ make kat
 make freestanding
 make audit-host
 
+EVP_KAT_STATUS=TOKEN_VAZIO
+if [ "${RMR_RUN_EVP_KAT:-0}" = "1" ]; then
+    make evp-kat
+    EVP_KAT_STATUS=PASS_LIMITED
+fi
+
+BENCH_STATUS=TOKEN_VAZIO
+if [ "${RMR_RUN_BENCH:-0}" = "1" ]; then
+    make bench
+    BENCH_STATUS=MEASURED_LOCAL_NO_COMPARISON
+fi
+
 C_KAT=$(build/rmr_kat_c)
 ASM_KAT=TOKEN_VAZIO
 ASM_BIN="build/rmr_kat_${ARCH}"
@@ -64,13 +76,15 @@ RECEIPT=build/termux_device_receipt.txt
     else
         echo "native_asm_kat=PASS"
     fi
+    echo "hosted_evp_kat=$EVP_KAT_STATUS"
+    echo "evp_benchmark=$BENCH_STATUS"
     echo "freestanding_object=PASS"
     echo "undefined_symbols=ZERO"
     echo "linker_sections=PASS"
     echo "c_kat_output=$C_KAT"
     echo "asm_kat_output=$ASM_KAT"
     echo "full_openssl_fork_build=TOKEN_VAZIO"
-    echo "silicon_benchmark=TOKEN_VAZIO"
+    echo "performance_comparison=TOKEN_VAZIO"
     echo "asic_fpga_synthesis=TOKEN_VAZIO"
 } > "$RECEIPT"
 
@@ -80,6 +94,15 @@ RECEIPT=build/termux_device_receipt.txt
         sha256sum "$ASM_BIN"
     fi
     sha256sum build/rmr_silicon.freestanding.o
+    if [ -x build/rmr_openssl_evp_kat ]; then
+        sha256sum build/rmr_openssl_evp_kat
+    fi
+    if [ -x build/rmr_openssl_evp_bench ]; then
+        sha256sum build/rmr_openssl_evp_bench
+    fi
+    if [ -f build/evp_bench.csv ]; then
+        sha256sum build/evp_bench.csv
+    fi
     sha256sum "$RECEIPT"
 } > build/TERMUX_SHA256SUMS
 
