@@ -8,6 +8,7 @@
 #include <time.h>
 #include <openssl/crypto.h>
 #include <openssl/evp.h>
+#include "../include/rmr_silicon.h"
 
 #define RMR_BENCH_SAMPLES 21u
 #define RMR_BENCH_WARMUPS 5u
@@ -166,8 +167,14 @@ int main(void)
     for (i = 0; i < sizeof(input_buffer); ++i)
         input_buffer[i] = (unsigned char)((i * 131u + 17u) & 0xffu);
 
+    printf("# openssl=%s\n", OpenSSL_version(OPENSSL_FULL_VERSION_STRING));
+    printf("# rmr_compile_caps=%016llx\n",
+           (unsigned long long)rmr_silicon_compile_caps());
+    printf("# rmr_build_policy=%016llx\n",
+           (unsigned long long)rmr_silicon_build_policy());
     puts("algorithm,bytes_per_op,ops_per_sample,samples,"
          "p50_ns,p95_ns,p99_ns,p50_mib_s");
+
     sha256_ok = benchmark_algorithm("SHA2-256");
     sha3_ok = benchmark_algorithm("SHA3-256");
     OPENSSL_cleanse(input_buffer, sizeof(input_buffer));
