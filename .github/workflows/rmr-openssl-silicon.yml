@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 jobs:
-  contract:
+  cmake-contract:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -19,12 +19,19 @@ jobs:
 
       - name: Toolchain identity
         run: |
+          cmake --version
+          ctest --version
+          ninja --version
           cc --version
           clang --version
           ld.lld --version
           readelf --version
 
-      - name: Build and audit isolated RMR layer
+      - name: Canonical CMake flags and KAT audit
+        working-directory: rmr
+        run: sh tools/audit_cmake_contract.sh
+
+      - name: Legacy cross-object audit
         working-directory: rmr
         run: sh tools/audit_contract.sh
 
@@ -33,6 +40,11 @@ jobs:
         with:
           name: rmr-openssl-silicon-contract
           path: |
+            rmr/out/build/host-native-release/cmake_receipt.txt
+            rmr/out/build/host-native-release/CMAKE_SHA256SUMS
+            rmr/out/build/host-native-release/rmr-cmake-flags-Release.txt
+            rmr/out/build/host-native-release/evp_bench.csv
+            rmr/out/build/portable-release/rmr-cmake-flags-Release.txt
             rmr/build/SHA256SUMS
             rmr/build/receipt.txt
           if-no-files-found: error
