@@ -26,7 +26,7 @@ else
 HOST_ASM :=
 endif
 
-.PHONY: all kat kat-c evp-kat freestanding audit audit-host audit-cross cross probe clean
+.PHONY: all kat kat-c evp-kat bench freestanding audit audit-host audit-cross cross probe clean
 all: kat-c kat freestanding cross audit
 
 $(BUILD):
@@ -54,6 +54,15 @@ evp-kat: | $(BUILD)
 		$(CORE) tools/openssl_evp_kat.c -lcrypto \
 		-o $(BUILD)/rmr_openssl_evp_kat
 	$(BUILD)/rmr_openssl_evp_kat
+
+bench: | $(BUILD)
+	$(CC) $(COMMON_WARN) $(COMMON_OPT) $(POLICY_DEFS) $(INC) \
+		$(CORE) tools/openssl_evp_bench.c -lcrypto \
+		-o $(BUILD)/rmr_openssl_evp_bench
+	$(BUILD)/rmr_openssl_evp_bench > $(BUILD)/evp_bench.csv
+	cat $(BUILD)/evp_bench.csv
+	sha256sum $(BUILD)/rmr_openssl_evp_bench $(BUILD)/evp_bench.csv \
+		> $(BUILD)/EVP_BENCH_SHA256SUMS
 
 freestanding: | $(BUILD)
 	$(CC) $(COMMON_WARN) $(COMMON_OPT) $(FREESTANDING) $(FREESTANDING_DEFS) \
