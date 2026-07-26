@@ -10,6 +10,8 @@
 | AArch64/ARMv7 executam corretamente no aparelho | `TOKEN_VAZIO` | executar o gate Termux no aparelho correspondente e preservar recibo/hash |
 | Linker preserva manifesto e texto RMR | `TESTED_LOCAL` | `readelf -SW` |
 | Manifesto imutável e materializado usam fold derivado | `TESTED_BY_KAT` | ambos são recalculados por `rmr_silicon_manifest_fold` |
+| SHA2-256 e SHA3-256 funcionam pela API EVP pública | `TESTED_HOSTED_LIMITED` | vetores conhecidos de `abc` em `openssl_evp_kat.c` |
+| AES-GCM, ChaCha20-Poly1305 e AES-CTR são consultáveis por provider | `OBSERVED_HOSTED_LOCAL` | `EVP_CIPHER_fetch` no OpenSSL local; não generalizar para outro build |
 | A API pública expõe configurações de CPU do OpenSSL | `SUPPORTED_BY_SOURCE_AND_LOCAL_PROBE` | `OPENSSL_info(OPENSSL_INFO_CPU_SETTINGS)` |
 | Há ganho de desempenho sobre OpenSSL upstream | `TOKEN_VAZIO` | benchmark isolado, p50/p95/p99, mesma ISA e flags |
 | A camada é apta a ASIC/FPGA | `HYPOTHESIS` | RTL, síntese, timing, área, potência e equivalência formal ausentes |
@@ -23,10 +25,11 @@ source_present
 ≠ object_compiled
 ≠ object_linked
 ≠ KAT_executed
+≠ provider_observed
 ≠ device_executed
 ≠ benchmark_reproduced
 ≠ silicon_proven
 ```
 
 Qualquer promoção deve apontar o artefato, arquitetura, compilador, flags,
-linker, ABI, aparelho, ambiente, hash e falsificador correspondentes.
+linker, ABI, aparelho, ambiente, provider, hash e falsificador correspondentes.
