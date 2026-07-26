@@ -1,0 +1,148 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 23,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base-release",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "BUILD_TESTING": "ON",
+        "RMR_ENABLE_IPO": "ON",
+        "RMR_ENABLE_ASM": "ON",
+        "RMR_STRICT_WARNINGS": "ON",
+        "RMR_BUILD_EVP_TOOLS": "ON",
+        "RMR_BUILD_BENCHMARK": "ON"
+      }
+    },
+    {
+      "name": "portable-release",
+      "displayName": "Portable Release",
+      "inherits": "base-release",
+      "cacheVariables": {
+        "RMR_ARCH_PROFILE": "portable",
+        "RMR_ENABLE_ASM": "OFF"
+      }
+    },
+    {
+      "name": "host-native-release",
+      "displayName": "Host Native O3 + ISA + IPO",
+      "inherits": "base-release",
+      "cacheVariables": {
+        "RMR_ARCH_PROFILE": "host-native"
+      }
+    },
+    {
+      "name": "x86_64-v3-release",
+      "displayName": "x86-64-v3 Release",
+      "inherits": "base-release",
+      "cacheVariables": {
+        "RMR_ARCH_PROFILE": "x86_64-v3"
+      }
+    },
+    {
+      "name": "termux-release",
+      "displayName": "Native Termux Release",
+      "inherits": "base-release",
+      "cacheVariables": {
+        "RMR_ARCH_PROFILE": "auto"
+      }
+    },
+    {
+      "name": "android-arm64-release",
+      "displayName": "Android arm64-v8a Crypto/CRC/NEON",
+      "inherits": "base-release",
+      "toolchainFile": "$env{ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake",
+      "cacheVariables": {
+        "ANDROID_ABI": "arm64-v8a",
+        "ANDROID_PLATFORM": "android-21",
+        "ANDROID_STL": "none",
+        "RMR_ARCH_PROFILE": "aarch64-crypto",
+        "RMR_BUILD_EVP_TOOLS": "OFF"
+      }
+    },
+    {
+      "name": "android-armv7-release",
+      "displayName": "Android armeabi-v7a NEON/VFPv4",
+      "inherits": "base-release",
+      "toolchainFile": "$env{ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake",
+      "cacheVariables": {
+        "ANDROID_ABI": "armeabi-v7a",
+        "ANDROID_PLATFORM": "android-21",
+        "ANDROID_ARM_NEON": "TRUE",
+        "ANDROID_STL": "none",
+        "RMR_ARCH_PROFILE": "armv7-neon",
+        "RMR_BUILD_EVP_TOOLS": "OFF"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "portable-release",
+      "configurePreset": "portable-release",
+      "jobs": 2
+    },
+    {
+      "name": "host-native-release",
+      "configurePreset": "host-native-release",
+      "jobs": 2
+    },
+    {
+      "name": "x86_64-v3-release",
+      "configurePreset": "x86_64-v3-release",
+      "jobs": 2
+    },
+    {
+      "name": "termux-release",
+      "configurePreset": "termux-release",
+      "jobs": 2
+    },
+    {
+      "name": "android-arm64-release",
+      "configurePreset": "android-arm64-release",
+      "jobs": 2
+    },
+    {
+      "name": "android-armv7-release",
+      "configurePreset": "android-armv7-release",
+      "jobs": 2
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "portable-release",
+      "configurePreset": "portable-release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "host-native-release",
+      "configurePreset": "host-native-release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "x86_64-v3-release",
+      "configurePreset": "x86_64-v3-release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "termux-release",
+      "configurePreset": "termux-release",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ]
+}
