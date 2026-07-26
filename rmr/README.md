@@ -14,6 +14,7 @@ sem modificar o OpenSSL upstream.
 cd rmr
 make kat-c       # referência C hospedada
 make kat         # referência C versus ASM da arquitetura hospedeira
+make evp-kat     # SHA-256/SHA3 e disponibilidade de ciphers via EVP público
 make freestanding
 make audit-host  # objeto local, símbolos e seções
 make cross       # objetos ligados x86_64, AArch64 e ARMv7
@@ -28,6 +29,9 @@ Auditoria completa do host de desenvolvimento:
 cd rmr
 sh tools/audit_contract.sh
 ```
+
+O `evp-kat` é hospedado e pode usar alocação interna do OpenSSL. Ele valida a
+ponte pública de biblioteca, não altera o contrato freestanding do núcleo RMR.
 
 ## Execução nativa no Android/Termux
 
@@ -66,6 +70,7 @@ mas não coleta serial, Android ID, IMEI ou outro identificador pessoal.
 ```text
 build/rmr_kat_c
 build/rmr_kat_<host>
+build/rmr_openssl_evp_kat
 build/rmr_silicon.freestanding.o
 build/rmr_silicon.{x86_64,aarch64,armv7}.linked.o
 build/SHA256SUMS
