@@ -11,7 +11,7 @@ need()
     }
 }
 
-for tool in cmake ctest ninja sha256sum grep; do
+for tool in cmake ctest ninja sha256sum grep nm readelf; do
     need "$tool"
 done
 
@@ -20,10 +20,12 @@ rm -rf out/build/portable-release out/build/host-native-release
 cmake --preset portable-release
 cmake --build --preset portable-release
 ctest --preset portable-release
+sh tools/audit_sha256_uop_contract.sh out/build/portable-release
 
 cmake --preset host-native-release
 cmake --build --preset host-native-release
 ctest --preset host-native-release
+sh tools/audit_sha256_uop_contract.sh out/build/host-native-release
 
 PORTABLE_DB=out/build/portable-release/compile_commands.json
 NATIVE_DB=out/build/host-native-release/compile_commands.json
@@ -42,7 +44,9 @@ fi
 {
     find out/build/portable-release out/build/host-native-release \
         -maxdepth 1 -type f \
-        \( -name 'rmr_*' -o -name 'librmr_*.a' -o -name 'evp_bench.csv' \) \
+        \( -name 'rmr_*' -o -name 'librmr_*.a' -o \
+           -name 'evp_bench.csv' -o -name 'sha256_uop_receipt.txt' -o \
+           -name 'SHA256_UOP_SHA256SUMS' \) \
         -print | sort | while IFS= read -r artifact; do
             sha256sum "$artifact"
         done
@@ -59,14 +63,20 @@ fi
     echo "native_ctest=PASS"
     echo "flag_O3=PASS"
     echo "flag_march_native=PASS"
+    echo "strict_sha256_uop_flags=PASS"
+    echo "sha256_kat=PASS"
+    echo "uop16_kat=PASS"
+    echo "module_linker_sections=PASS"
     echo "ipo_requested=ON"
     echo "benchmark=$BENCH_STATUS"
     echo "performance_gain_claim=BLOCKED"
     echo "android_arm64_build=TOKEN_VAZIO"
     echo "android_armv7_build=TOKEN_VAZIO"
     echo "native_android_execution=TOKEN_VAZIO"
+    echo "openssl_tls_integration=TOKEN_VAZIO"
 } > "$NATIVE_DIR/cmake_receipt.txt"
 
 cat "$NATIVE_DIR/cmake_receipt.txt"
 echo "flags=$NATIVE_DIR/rmr-cmake-flags-Release.txt"
 echo "hashes=$NATIVE_DIR/CMAKE_SHA256SUMS"
+echo "sha256_uop=$NATIVE_DIR/sha256_uop_receipt.txt"
