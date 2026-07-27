@@ -112,6 +112,22 @@ function(rmr_apply_optimization target)
   endif()
 endfunction()
 
+# Stronger contract for new low-level modules. It is target-scoped so upstream
+# OpenSSL and legacy hosted tools do not inherit flags they were not audited for.
+function(rmr_apply_strict_module_contract target)
+  target_compile_options(${target} PRIVATE
+    $<$<COMPILE_LANG_AND_ID:C,GNU,Clang,AppleClang>:-Wshadow>
+    $<$<COMPILE_LANG_AND_ID:C,GNU,Clang,AppleClang>:-Wconversion>
+    $<$<COMPILE_LANG_AND_ID:C,GNU,Clang,AppleClang>:-Wsign-conversion>
+    $<$<COMPILE_LANG_AND_ID:C,GNU,Clang,AppleClang>:-Wstrict-prototypes>
+    $<$<COMPILE_LANG_AND_ID:C,GNU,Clang,AppleClang>:-Wmissing-prototypes>
+    $<$<COMPILE_LANG_AND_ID:C,GNU,Clang,AppleClang>:-Wmissing-declarations>
+    $<$<COMPILE_LANG_AND_ID:C,GNU,Clang,AppleClang>:-Wundef>
+    $<$<COMPILE_LANG_AND_ID:C,GNU,Clang,AppleClang>:-fno-optimize-sibling-calls>
+    $<$<COMPILE_LANG_AND_ID:C,GNU,Clang,AppleClang>:-fno-common>
+  )
+endfunction()
+
 function(rmr_apply_link_optimization target)
   if(UNIX AND NOT APPLE)
     target_link_options(${target} PRIVATE

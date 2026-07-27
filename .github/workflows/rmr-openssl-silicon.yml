@@ -44,7 +44,11 @@ jobs:
             rmr/out/build/host-native-release/CMAKE_SHA256SUMS
             rmr/out/build/host-native-release/rmr-cmake-flags-Release.txt
             rmr/out/build/host-native-release/evp_bench.csv
+            rmr/out/build/host-native-release/sha256_uop_receipt.txt
+            rmr/out/build/host-native-release/SHA256_UOP_SHA256SUMS
             rmr/out/build/portable-release/rmr-cmake-flags-Release.txt
+            rmr/out/build/portable-release/sha256_uop_receipt.txt
+            rmr/out/build/portable-release/SHA256_UOP_SHA256SUMS
             rmr/build/SHA256SUMS
             rmr/build/receipt.txt
           if-no-files-found: error

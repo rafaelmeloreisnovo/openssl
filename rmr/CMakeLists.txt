@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
 project(rmr_openssl_silicon
-  VERSION 1.1.0
+  VERSION 1.2.0
   DESCRIPTION "RMR OpenSSL bit/flags/linker/silicon contract"
   LANGUAGES C ASM)
 
@@ -71,6 +71,39 @@ rmr_configure_core(rmr_silicon TRUE TRUE)
 add_library(RMR::silicon ALIAS rmr_silicon)
 add_library(RMR::silicon_c ALIAS rmr_silicon_c)
 
+# Strict, caller-owned SHA-256 and bounded 16-slot micro-op layer. The OpenSSL
+# upstream tree remains untouched; this target lives entirely under rmr/**.
+add_library(rmr_freestanding_sha256 STATIC
+  core/rmr_module.c
+  core/rmr_microop.c
+  core/rmr_sha256.c)
+target_include_directories(rmr_freestanding_sha256 PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
+target_compile_features(rmr_freestanding_sha256 PUBLIC c_std_11)
+target_compile_definitions(rmr_freestanding_sha256 PRIVATE
+  ${RMR_COMMON_DEFINITIONS}
+  RMR_NO_LIBC=1
+  RMR_NO_BUILTIN=1
+  RMR_NO_STACK_PROTECTOR=1
+  RMR_NO_TAILCALL=1
+  RMR_NO_SHADOW=1
+  RMR_CALLER_STORAGE=1
+  RMR_SELECTIVE_PATCH=1
+  RMR_MODULE_SECTIONS=1)
+target_compile_options(rmr_freestanding_sha256 PRIVATE
+  $<$<COMPILE_LANG_AND_ID:C,GNU,Clang,AppleClang>:-ffreestanding>
+  $<$<COMPILE_LANG_AND_ID:C,GNU,Clang,AppleClang>:-fno-builtin>
+  $<$<COMPILE_LANG_AND_ID:C,GNU,Clang,AppleClang>:-fno-stack-protector>)
+target_link_libraries(rmr_freestanding_sha256 PUBLIC RMR::silicon_c)
+set_target_properties(rmr_freestanding_sha256 PROPERTIES
+  C_EXTENSIONS OFF
+  C_VISIBILITY_PRESET hidden
+  VISIBILITY_INLINES_HIDDEN YES
+  POSITION_INDEPENDENT_CODE OFF)
+rmr_apply_optimization(rmr_freestanding_sha256)
+rmr_apply_strict_module_contract(rmr_freestanding_sha256)
+add_library(RMR::freestanding_sha256 ALIAS rmr_freestanding_sha256)
+
 if(BUILD_TESTING)
   add_executable(rmr_kat_c tests/kat.c)
   target_link_libraries(rmr_kat_c PRIVATE RMR::silicon_c)
@@ -82,15 +115,23 @@ if(BUILD_TESTING)
   rmr_apply_optimization(rmr_kat)
   rmr_apply_link_optimization(rmr_kat)
 
+  add_executable(rmr_sha256_uop_kat tests/sha256_uop_kat.c)
+  target_link_libraries(rmr_sha256_uop_kat PRIVATE RMR::freestanding_sha256)
+  rmr_apply_optimization(rmr_sha256_uop_kat)
+  rmr_apply_link_optimization(rmr_sha256_uop_kat)
+
   if(UNIX AND NOT APPLE)
     target_link_options(rmr_kat_c PRIVATE
       -Wl,-T,${CMAKE_CURRENT_SOURCE_DIR}/linker/rmr_sections.ld)
     target_link_options(rmr_kat PRIVATE
       -Wl,-T,${CMAKE_CURRENT_SOURCE_DIR}/linker/rmr_sections.ld)
+    target_link_options(rmr_sha256_uop_kat PRIVATE
+      -Wl,-T,${CMAKE_CURRENT_SOURCE_DIR}/linker/rmr_modules.ld)
   endif()
 
   add_test(NAME rmr.kat.c COMMAND rmr_kat_c)
   add_test(NAME rmr.kat.arch COMMAND rmr_kat)
+  add_test(NAME rmr.sha256.uop.kat COMMAND rmr_sha256_uop_kat)
 endif()
 
 if(RMR_BUILD_EVP_TOOLS)
@@ -125,7 +166,7 @@ rmr_resolve_profile(RMR_FINAL_PROFILE)
 file(GENERATE
   OUTPUT "${CMAKE_BINARY_DIR}/rmr-cmake-flags-$<CONFIG>.txt"
   CONTENT
-"project=${PROJECT_NAME}\nversion=${PROJECT_VERSION}\ncompiler=${CMAKE_C_COMPILER}\ncompiler_id=${CMAKE_C_COMPILER_ID}\ncompiler_version=${CMAKE_C_COMPILER_VERSION}\nsystem=${CMAKE_SYSTEM_NAME}\nprocessor=${CMAKE_SYSTEM_PROCESSOR}\nandroid_abi=${ANDROID_ABI}\nbuild_type=${CMAKE_BUILD_TYPE}\nprofile=${RMR_FINAL_PROFILE}\ncpu_tune=${RMR_CPU_TUNE}\nipo=${RMR_ENABLE_IPO}\nasm=${RMR_ENABLE_ASM}\ncore_compile_options=$<JOIN:$<TARGET_PROPERTY:rmr_silicon,COMPILE_OPTIONS>, >\ncore_definitions=$<JOIN:$<TARGET_PROPERTY:rmr_silicon,COMPILE_DEFINITIONS>, >\n")
+"project=${PROJECT_NAME}\nversion=${PROJECT_VERSION}\ncompiler=${CMAKE_C_COMPILER}\ncompiler_id=${CMAKE_C_COMPILER_ID}\ncompiler_version=${CMAKE_C_COMPILER_VERSION}\nsystem=${CMAKE_SYSTEM_NAME}\nprocessor=${CMAKE_SYSTEM_PROCESSOR}\nandroid_abi=${ANDROID_ABI}\nbuild_type=${CMAKE_BUILD_TYPE}\nprofile=${RMR_FINAL_PROFILE}\ncpu_tune=${RMR_CPU_TUNE}\nipo=${RMR_ENABLE_IPO}\nasm=${RMR_ENABLE_ASM}\ncore_compile_options=$<JOIN:$<TARGET_PROPERTY:rmr_silicon,COMPILE_OPTIONS>, >\ncore_definitions=$<JOIN:$<TARGET_PROPERTY:rmr_silicon,COMPILE_DEFINITIONS>, >\nsha256_compile_options=$<JOIN:$<TARGET_PROPERTY:rmr_freestanding_sha256,COMPILE_OPTIONS>, >\nsha256_definitions=$<JOIN:$<TARGET_PROPERTY:rmr_freestanding_sha256,COMPILE_DEFINITIONS>, >\n")
 
 message(STATUS "RMR CMake profile: ${RMR_FINAL_PROFILE}")
 message(STATUS "RMR CPU tune: '${RMR_CPU_TUNE}'")

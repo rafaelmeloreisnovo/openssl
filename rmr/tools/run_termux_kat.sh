@@ -12,7 +12,7 @@ need()
     }
 }
 
-for tool in cmake ctest ninja cc nm readelf sha256sum uname sed date dirname; do
+for tool in cmake ctest ninja cc nm readelf sha256sum uname sed date dirname grep; do
     need "$tool"
 done
 
@@ -31,9 +31,11 @@ rm -rf "$BUILD_DIR"
 cmake --preset termux-release
 cmake --build --preset termux-release
 ctest --preset termux-release
+sh tools/audit_sha256_uop_contract.sh "$BUILD_DIR"
 
 C_KAT=$($BUILD_DIR/rmr_kat_c)
 ASM_KAT=$($BUILD_DIR/rmr_kat)
+$BUILD_DIR/rmr_sha256_uop_kat
 
 if [ -n "$(nm -u "$BUILD_DIR/librmr_silicon_c.a")" ]; then
     echo "freestanding_archive_has_undefined_symbols" >&2
@@ -94,10 +96,12 @@ RECEIPT=$BUILD_DIR/termux_device_receipt.txt
     echo "openssl_cli=$OPENSSL_VERSION"
     echo "native_c_kat=PASS"
     echo "native_asm_kat=PASS"
+    echo "native_sha256_uop_kat=PASS"
     echo "hosted_evp_kat=$EVP_KAT_STATUS"
     echo "evp_benchmark=$BENCH_STATUS"
     echo "flag_O3=PASS"
     echo "architecture_flags=PASS"
+    echo "strict_sha256_uop_flags=PASS"
     echo "ipo_requested=ON"
     echo "freestanding_archive=PASS"
     echo "undefined_symbols=ZERO"
@@ -105,15 +109,20 @@ RECEIPT=$BUILD_DIR/termux_device_receipt.txt
     echo "c_kat_output=$C_KAT"
     echo "asm_kat_output=$ASM_KAT"
     echo "full_openssl_fork_build=TOKEN_VAZIO"
+    echo "openssl_tls_integration=TOKEN_VAZIO"
     echo "performance_comparison=TOKEN_VAZIO"
+    echo "physical_parallel_issue=TOKEN_VAZIO_HARDWARE"
     echo "asic_fpga_synthesis=TOKEN_VAZIO"
 } > "$RECEIPT"
 
 {
     sha256sum "$BUILD_DIR/rmr_kat_c"
     sha256sum "$BUILD_DIR/rmr_kat"
+    sha256sum "$BUILD_DIR/rmr_sha256_uop_kat"
     sha256sum "$BUILD_DIR/librmr_silicon_c.a"
     sha256sum "$BUILD_DIR/librmr_silicon.a"
+    sha256sum "$BUILD_DIR/librmr_freestanding_sha256.a"
+    sha256sum "$BUILD_DIR/sha256_uop_receipt.txt"
     if [ -x "$BUILD_DIR/rmr_openssl_evp_kat" ]; then
         sha256sum "$BUILD_DIR/rmr_openssl_evp_kat"
     fi
