@@ -64,6 +64,8 @@ sha256sum "$KAT" "$LIB" > "$HASHES"
     echo 'status=PASS_LOCAL_CONTRACT'
     echo 'sha256_empty_kat=PASS'
     echo 'sha256_abc_kat=PASS'
+    echo 'sha256_fragmented_abc_kat=PASS'
+    echo 'sha256_multiblock_kat=PASS'
     echo 'uop16_mov_xor_push_pull_patch_jump=PASS'
     echo 'caller_owned_memory=PASS'
     echo 'heap_gc_runtime_symbols=ZERO'
