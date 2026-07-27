@@ -30,6 +30,15 @@ int main(void)
         0xb0,0x03,0x61,0xa3,0x96,0x17,0x7a,0x9c,
         0xb4,0x10,0xff,0x61,0xf2,0x00,0x15,0xad
     };
+    static const char long_message[] =
+        "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq";
+    static const rmr_u8 expected_long[32] = {
+        0x24,0x8d,0x6a,0x61,0xd2,0x06,0x38,0xb8,
+        0xe5,0xc0,0x26,0x93,0x0c,0x3e,0x60,0x39,
+        0xa3,0x3c,0xe4,0x59,0x64,0xff,0x21,0x67,
+        0xf6,0xec,0xed,0xd4,0x19,0xdb,0x06,0xc1
+    };
+    struct rmr_sha256_ctx sha_ctx;
     struct rmr_sha256_workspace workspace;
     rmr_u8 digest[32];
     struct rmr_uop block[16] = {{0}};
@@ -46,6 +55,24 @@ int main(void)
     rmr_sha256_digest("abc", 3u, &workspace, digest);
     if (!bytes_equal(digest, expected_abc, 32u)) {
         return 2;
+    }
+
+    rmr_sha256_init(&sha_ctx);
+    rmr_sha256_update(&sha_ctx, &workspace, "a", 1u);
+    rmr_sha256_update(&sha_ctx, &workspace, "b", 1u);
+    rmr_sha256_update(&sha_ctx, &workspace, "c", 1u);
+    rmr_sha256_final(&sha_ctx, &workspace, digest);
+    if (!bytes_equal(digest, expected_abc, 32u)) {
+        return 3;
+    }
+
+    rmr_sha256_digest(
+        long_message,
+        (rmr_size)(sizeof(long_message) - 1u),
+        &workspace,
+        digest);
+    if (!bytes_equal(digest, expected_long, 32u)) {
+        return 4;
     }
 
     rmr_uop_state_init(&state);
@@ -94,16 +121,16 @@ int main(void)
     rmr_uop_run16(&state, block, 0x03ffu, &receipt);
 
     if (state.reg[0] != 0u) {
-        return 3;
-    }
-    if (state.reg[1] != 0x12cb0087u) {
-        return 4;
-    }
-    if (state.reg[2] != 0u) {
         return 5;
     }
-    if (receipt.jump_count == 0u || receipt.fault_mask != 0u) {
+    if (state.reg[1] != 0x12cb0087u) {
         return 6;
+    }
+    if (state.reg[2] != 0u) {
+        return 7;
+    }
+    if (receipt.jump_count == 0u || receipt.fault_mask != 0u) {
+        return 8;
     }
 
     sha_module = rmr_sha256_module_descriptor();
@@ -111,11 +138,11 @@ int main(void)
 
     if (sha_module->module_id != RMR_MODULE_ID_SHA256 ||
         rmr_module_descriptor_fold(sha_module) == 0u) {
-        return 7;
+        return 9;
     }
     if (uop_module->module_id != RMR_MODULE_ID_UOP16 ||
         rmr_module_descriptor_fold(uop_module) == 0u) {
-        return 8;
+        return 10;
     }
 
     return 0;
