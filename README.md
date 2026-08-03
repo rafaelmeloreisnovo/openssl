@@ -1,6 +1,10 @@
 Welcome to the OpenSSL Project
 ==============================
 
+**Estado:** `REFERENCE`  
+**Proprietário lógico:** `security-maintainer`  
+**Repositório:** [`rafaelmeloreisnovo/openssl`](https://github.com/rafaelmeloreisnovo/openssl)
+
 [![openssl logo]][www.openssl.org]
 
 [![github actions ci badge]][github actions ci]
