@@ -1,4 +1,5 @@
-# START HERE — OpenSSL fork provenance and reconstruction
+START HERE — OpenSSL fork provenance and reconstruction
+======================================================
 
 Status: `FORK_LOCAL_NAVIGATION`  
 Observed: `2026-10-04`  
@@ -7,7 +8,8 @@ Local branch authority: `master`
 
 This file is a **fork-local navigation overlay**. It does not replace OpenSSL documentation, licensing, copyright notices, security policy, or upstream release guidance.
 
-## 1. Authority map
+1. Authority map
+----------------
 
 | Question | Authority |
 |---|---|
@@ -20,7 +22,8 @@ This file is a **fork-local navigation overlay**. It does not replace OpenSSL do
 
 `security-maintainer` in the local README is an **operational governance role for this fork**. It is not a statement of ownership over inherited OpenSSL material.
 
-## 2. Current divergence snapshot
+2. Current divergence snapshot
+------------------------------
 
 Provider readback on 2026-10-04 observed:
 
@@ -38,7 +41,8 @@ local behind_by         = 939 commits
 
 This is a **measurement**, not a recommendation to merge, rebase, or discard either side. The counts are time-bound and must be re-read before any synchronization decision.
 
-## 3. Provenance invariant
+3. Provenance invariant
+-----------------------
 
 ```text
 FORK_CONTROL != AUTHORSHIP_OF_UPSTREAM
@@ -50,7 +54,8 @@ TOKEN_VAZIO != 0
 
 For inherited or modified upstream files, the upstream Apache-2.0 license and file-level notices remain controlling unless a specific file supplies a compatible additional notice. A separate RAFAELIA license is **not inferred** merely because a local commit exists.
 
-## 4. Lowest-risk reconstruction route
+4. Lowest-risk reconstruction route
+-----------------------------------
 
 1. Freeze the exact local and upstream refs being compared.
 2. Inventory the local delta by path and commit; do not infer ownership from repository control.
@@ -62,7 +67,8 @@ For inherited or modified upstream files, the upstream Apache-2.0 license and fi
 
 Do **not** use a blind upstream merge as a provenance mechanism. A green build after synchronization would prove only the executed build/test scope; it would not prove authorship, legal clearance, FIPS validation, or production suitability.
 
-## 5. Fast routes
+5. Fast routes
+--------------
 
 - Official project overview/build/docs: `README.md`, `INSTALL.md`, `doc/`, and upstream `openssl/openssl`.
 - License authority: `LICENSE.txt`.
@@ -70,7 +76,8 @@ Do **not** use a blind upstream merge as a provenance mechanism. A green build a
 - Upstream contribution rules: `CONTRIBUTING.md`.
 - Security-sensitive work: preserve upstream security guidance and never treat this fork as the official OpenSSL distribution.
 
-## 6. Current gaps
+6. Current gaps
+---------------
 
 ```text
 FILE_LEVEL_LOCAL_DELTA_RIGHTS_MATRIX = TOKEN_VAZIO
