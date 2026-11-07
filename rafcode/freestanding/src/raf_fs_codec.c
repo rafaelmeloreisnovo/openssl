@@ -66,6 +66,16 @@ raf_fs_u32 raf_fs_decode(raf_fs_state *state, const void *src,
     if (next.allowed != state->allowed
         || next.generation < state->generation)
         return 0u;
+    /* The generation is a state-version fence, not a cryptographic nonce.
+     * Equal-generation records are idempotent only when all fields agree;
+     * otherwise they could rewrite receiver state without a new version. */
+    if (next.generation == state->generation) {
+        if (next.active != state->active
+            || next.previous != state->previous
+            || next.undo_valid != state->undo_valid)
+            return 0u;
+        return 1u;
+    }
     /* Commit after all field checks: invalid packet leaves state intact. */
     state->allowed = next.allowed;
     state->active = next.active;
