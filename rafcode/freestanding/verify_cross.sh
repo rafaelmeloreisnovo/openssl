@@ -14,7 +14,12 @@ for TARGET in armv7a-linux-gnueabi aarch64-linux-gnu; do
         clang --target="$TARGET" -std=c11 -Os -Wall -Wextra -Werror \
             -ffreestanding -fno-builtin -fno-stack-protector \
             -c "$ROOT/src/$SRC.c" -o "$OUT"
-        test "$(readelf -h "$OUT" | grep -c 'Class:') " != '' || exit 1
+        # Verify the actual ELF machine, not just successful compiler exit.
+        case "$TARGET" in
+          armv7a-linux-gnueabi) EXPECT='Machine:.*ARM' ;;
+          aarch64-linux-gnu)  EXPECT='Machine:.*AArch64' ;;
+        esac
+        readelf -h "$OUT" | grep -Eq "$EXPECT" || { echo "FAIL: wrong ELF machine"; exit 1; }
         if readelf -Ws "$OUT" | awk '$7 == "UND" && $8 != "" {bad=1} END {exit !bad}'; then
             echo "FAIL: external undefined symbol in $OUT"
             exit 1
