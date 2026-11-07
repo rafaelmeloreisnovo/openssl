@@ -1,0 +1,55 @@
+{
+  "schema": "rafaelia.rafcode-fs.evidence.equal-generation/v1",
+  "mu_id": "MU-OPENSSL-FS-GEN-FENCE-20261107-S3",
+  "predecessor": "MU-OPENSSL-RAFCODE-FS-LOCAL-VALIDATED-20261107-S2",
+  "upstream_merge": {
+    "pr": "https://github.com/rafaelmeloreisnovo/openssl/pull/9",
+    "merged_at": "2026-11-07T06:57:26Z",
+    "merge_commit": "0b1c6fcd8d753aebb3af98900804f3128486e618"
+  },
+  "claim_allowed": false,
+  "issue": "Conflicting same-generation packet rewrote active/previous/undo_valid without version change",
+  "baseline_reproducer": {
+    "state": "CONFIRMED_FAIL_BEFORE_FIX",
+    "exit_code": 1,
+    "meaning": "raf_fs_decode accepted conflicting same-generation active value"
+  },
+  "fix": "same-generation record accepted only if every state field already matches; otherwise reject without mutation",
+  "git_blob_sha1": {
+    "rafcode/freestanding/include/raf_fs.h": "4faa3b31052216c686249271dc5759528315ab5c",
+    "rafcode/freestanding/src/raf_fs_core.c": "0db2fe77088ad25fae2ee6b9b8fdb86d07114ea6",
+    "rafcode/freestanding/src/raf_fs_codec.c": "1a6da1f2216af7a52910e6c2e2657696785949b7",
+    "rafcode/freestanding/tests/host_test.c": "2a9c9cfd3d00790c317759d8763532f0012b42de",
+    "rafcode/freestanding/verify.sh": "7fbbddda286ab2ea899272ee4338d346d8df0632",
+    "rafcode/freestanding/verify_cross.sh": "efadd2ade9f52097769344513b63598731b3929b"
+  },
+  "evidence": {
+    "environment": "Linux host x86_64, GCC 14.2.0, Clang 17.0.0",
+    "host_matrix": [
+      "gcc -Os PASS",
+      "gcc -O2 PASS",
+      "gcc -O3 PASS",
+      "clang -Os PASS",
+      "clang -O2 PASS",
+      "clang -O3 PASS"
+    ],
+    "cross": [
+      "clang armv7a-linux-gnueabi both objects PASS",
+      "clang aarch64-linux-gnu both objects PASS"
+    ],
+    "undefined_symbols": "0 for checked core objects",
+    "reproducer_after_fix": "PASS on 6 host profiles",
+    "original_gates": "Exact Git-blob verify.sh and verify_cross.sh reconstructed, PASS locally",
+    "source_hashes": "git hash-object local bytes identical to provider readback on modified files"
+  },
+  "gaps": {
+    "github_actions_terminal": "TOKEN_VAZIO_NOT_YET_OBSERVED",
+    "real_device_execution": "TOKEN_VAZIO",
+    "cryptographic_integrity": "NOT_IMPLEMENTED",
+    "authentication": "EXTERNAL_ADAPTER_REQUIRED",
+    "network_anti_replay_proof": "NOT_CLAIMED",
+    "performance_gain": "TOKEN_VAZIO",
+    "license_review": "PENDING"
+  },
+  "rollback": "Successor PR unmerged; do not rewrite master history; authorized corrective commit or revert with append-only receipt."
+}
