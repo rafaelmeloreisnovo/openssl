@@ -61,6 +61,11 @@ raf_fs_u32 raf_fs_decode(raf_fs_state *state, const void *src,
     next.undo_valid = raf_fs_load32(p + 20u);
     if (!raf_fs_valid(&next))
         return 0u;
+    /* A wire payload cannot authorize additional capabilities or rewind
+     * a receiver's generation. Authentication of payload is external. */
+    if (next.allowed != state->allowed
+        || next.generation < state->generation)
+        return 0u;
     /* Commit after all field checks: invalid packet leaves state intact. */
     state->allowed = next.allowed;
     state->active = next.active;
