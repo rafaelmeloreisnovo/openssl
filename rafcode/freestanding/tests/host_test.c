@@ -11,7 +11,7 @@ static raf_fs_u32 same(const raf_fs_state *a, const raf_fs_state *b)
 }
 int main(void)
 {
-    raf_fs_state st, restored, snapshot;
+    raf_fs_state st, restored, snapshot, genesis;
     raf_fs_u8 raw[RAF_FS_WIRE_BYTES];
     raf_fs_u32 i;
     raf_fs_init((void *)0, 7u);
@@ -58,6 +58,32 @@ int main(void)
     if (raf_fs_decode(&restored, raw, 24u)) return 36;
     raw[16] = 3u;
     if (!same(&restored, &snapshot)) return 37;
+    /* Same generation must be either identical (idempotent) or rejected.
+     * Old code allowed an unchanged version to rewrite active/previous/undo. */
+    raw[8] = 2u;
+    if (raf_fs_decode(&restored, raw, 24u)) return 38;
+    raw[8] = 1u;
+    if (!same(&restored, &snapshot)) return 39;
+    raw[12] = 2u;
+    if (raf_fs_decode(&restored, raw, 24u)) return 40;
+    raw[12] = 3u;
+    if (!same(&restored, &snapshot)) return 41;
+    raw[20] = 1u;
+    if (raf_fs_decode(&restored, raw, 24u)) return 42;
+    raw[20] = 0u;
+    if (!same(&restored, &snapshot)) return 43;
+    if (!raf_fs_decode(&restored, raw, 24u)) return 44;
+    if (!same(&restored, &snapshot)) return 45;
+    /* Genesis generation zero cannot be used to inject a state change. */
+    raf_fs_init(&genesis, 3u);
+    raw[16] = 0u;
+    raw[8] = 1u;
+    raw[12] = 0u;
+    if (raf_fs_decode(&genesis, raw, 24u)) return 46;
+    if (genesis.generation || genesis.active || genesis.previous) return 47;
+    raw[8] = 0u;
+    if (!raf_fs_decode(&genesis, raw, 24u)) return 48;
+    if (genesis.generation || genesis.active || genesis.previous) return 49;
     for (i = 0u; i < 24u; ++i) raw[i] = 0u;
     if (raf_fs_decode(&restored, raw, 24u)) return 27;
     if (!same(&restored, &snapshot)) return 28;
