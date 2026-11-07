@@ -1,6 +1,6 @@
 # RAFCODE Ω — L1 freestanding autoral, isolado do OpenSSL
 
-**Escopo:** camada de controle e transporte de estado **não criptográfica**. Não é implementação de SSL/TLS, cifra, hash, KDF, RNG, assinatura, provider nem substituto auditado do OpenSSL. Não chamar isto de biblioteca OpenSSL independente.
+**Estado de integração:** PR #9 mesclada ao `master` em 2026-11-07, merge commit `0b1c6fcd8d753aebb3af98900804f3128486e618`. Este diretório não foi integrado a `libcrypto`; o gate de CI da PR #9 não foi observado aqui. Correções posteriores seguem por PR sucessora.\n\n**Escopo:** camada de controle e transporte de estado **não criptográfica**. Não é implementação de SSL/TLS, cifra, hash, KDF, RNG, assinatura, provider nem substituto auditado do OpenSSL. Não chamar isto de biblioteca OpenSSL independente.
 
 ## Dependências por fase
 
@@ -8,7 +8,7 @@
 - **Fábrica/CI:** requer compilador C11, `nm`, `clang`/`readelf` para cross objects e um sistema host para executar o harness. Dependência de **compilação/testes ≠ dependência de runtime**.
 - **Execução real:** hardware, ABI, integridade de transporte, tratamento de erros e chamadas do kernel ficam sob responsabilidade de um *adapter* explícito, fora deste core. Este diretório não inclui adaptador de syscall nem integração em libcrypto. `TOKEN_VAZIO` para runtime Android/ARM.
 - **Thread safety:** single-owner; não é API atômica ou sincronizada.
-- **Persistência:** `raf_fs_encode/decode` transportam 24 bytes com tag de versão e verificações de domínio, **sem autenticação/integridade criptográfica**. Fonte não confiável exige uma camada externa autenticada antes de aceitar comandos.
+- **Persistência:** `raf_fs_encode/decode` transportam 24 bytes com tag de versão e verificações de domínio, **sem autenticação/integridade criptográfica**. Fonte não confiável exige uma camada externa autenticada antes de aceitar comandos. O guard de geração impede retrocesso e, na PR sucessora, exige identidade integral para registros com geração igual. **Não** impede falsificação de registros com geração futura sem autenticação do adaptador.
 
 ## Arquitetura modular
 ```
@@ -39,4 +39,4 @@ sh rafcode/freestanding/verify_cross.sh
 
 **Contrato:** `SOURCE != ARTIFACT != EXECUTION != EVIDENCE != CLAIM`. `PASS` do gate só certifica as verificações exibidas; não valida segurança criptográfica, Android nem desempenho. `TOKEN_VAZIO` permanece tipado.
 
-Rollback: branch/PR draft não altera master; correção por novo commit e receipt de supersessão, sem apagar a história. A escolha MIT exige revisão do autor antes do merge.
+Rollback após o merge da PR #9: não reescrever o histórico; usar commit corretivo ou revert autorizado, com receipt de supersessão e testes de regressão. A licença MIT já consta nos arquivos integrados; a auditoria de autoria e compatibilidade por arquivo continua independente e pendente.
