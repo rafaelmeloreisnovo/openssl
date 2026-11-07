@@ -24,7 +24,7 @@ for OPT in -Os -O2 -O3; do
     test -z "$(nm -u "$TMP/core.o")" || { echo 'FAIL: unresolved core symbol'; exit 1; }
     test -z "$(nm -u "$TMP/codec.o")" || { echo 'FAIL: unresolved codec symbol'; exit 1; }
 
-    # Four intended C API names only; no libc helpers.
+    # Five intended C API names only; no libc helpers.
     EXPECTED='raf_fs_decode raf_fs_encode raf_fs_init raf_fs_rollback raf_fs_transition'
     FOUND=$(nm -g --defined-only "$TMP/core.o" "$TMP/codec.o" | awk '$2 ~ /^[TW]$/ {print $3}' | sort | tr '\n' ' ' | sed 's/ $//')
     test "$FOUND" = "$EXPECTED" || {
