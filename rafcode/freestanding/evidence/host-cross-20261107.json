@@ -1,0 +1,86 @@
+{
+  "schema": "rafaelia/rafcode-openssl-freestanding-local-gates/v1",
+  "receipt_id": "MU-OPENSSL-RAFCODE-FS-LOCAL-GATES-20261107-S2",
+  "parent": "MU-OPENSSL-RAFCODE-FS-PR9-20261107-S1",
+  "source": "https://github.com/rafaelmeloreisnovo/openssl/pull/9",
+  "scope": "exact-source-blob-local-toolchain-validation-not-provider-CI",
+  "source_blobs_git_sha1": {
+    "include/raf_fs.h": "4faa3b31052216c686249271dc5759528315ab5c",
+    "src/raf_fs_core.c": "0db2fe77088ad25fae2ee6b9b8fdb86d07114ea6",
+    "src/raf_fs_codec.c": "5f47f6a4ed6d15c8adcb62e0316187f3e08a99f2",
+    "tests/host_test.c": "a4bb3579b408de9df11e0f809b34678824431f32"
+  },
+  "environment": {
+    "os": "Linux",
+    "kernel": "6.18.57",
+    "arch": "x86_64",
+    "gcc": "Debian 14.2.0",
+    "clang": "17.0.0",
+    "git": "2.47.3"
+  },
+  "test_matrix": [
+    {
+      "cc": "gcc",
+      "profiles": [
+        "-Os",
+        "-O2",
+        "-O3"
+      ],
+      "compile_c11": true,
+      "host_negative_harness": "PASS",
+      "nm_undefined": 0
+    },
+    {
+      "cc": "clang",
+      "profiles": [
+        "-Os",
+        "-O2",
+        "-O3"
+      ],
+      "compile_c11": true,
+      "host_negative_harness": "PASS",
+      "nm_undefined": 0
+    }
+  ],
+  "cross_object": [
+    {
+      "target": "armv7a-linux-gnueabi",
+      "source": "raf_fs_core.c",
+      "elf_machine": "ARM",
+      "object_bytes": 1136,
+      "undefined_symbols": 0
+    },
+    {
+      "target": "armv7a-linux-gnueabi",
+      "source": "raf_fs_codec.c",
+      "elf_machine": "ARM",
+      "object_bytes": 1364,
+      "undefined_symbols": 0
+    },
+    {
+      "target": "aarch64-linux-gnu",
+      "source": "raf_fs_core.c",
+      "elf_machine": "AArch64",
+      "object_bytes": 1096,
+      "undefined_symbols": 0
+    },
+    {
+      "target": "aarch64-linux-gnu",
+      "source": "raf_fs_codec.c",
+      "elf_machine": "AArch64",
+      "object_bytes": 1504,
+      "undefined_symbols": 0
+    }
+  ],
+  "restrictions": {
+    "object_bytes_are_not_runtime_binary_size": true,
+    "crypto_validation": "TOKEN_VAZIO",
+    "performance_gain": "TOKEN_VAZIO",
+    "android_device_execution": "TOKEN_VAZIO",
+    "github_actions_exact_head": "TOKEN_VAZIO_NOT_OBSERVED",
+    "license_review": "PENDING",
+    "claim_allowed": false,
+    "merge_allowed": false
+  },
+  "rollback": "PR remains draft; main unchanged; correction via successor receipt"
+}

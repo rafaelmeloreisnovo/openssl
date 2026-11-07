@@ -1,0 +1,49 @@
+# SPDX-FileCopyrightText: 2026 Rafael Melo Reis
+# SPDX-License-Identifier: MIT
+name: RAFCODE freestanding authorial L1 V2
+
+"on":
+  pull_request:
+    branches: [master]
+    paths:
+      - "rafcode/freestanding/**"
+      - ".github/workflows/rafcode-freestanding-v2.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rafcode-fs-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compile-and-falsify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Fetch exact source ref without Marketplace Actions
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init .
+          git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git"
+          git fetch --depth=1 origin "$SOURCE_SHA"
+          git checkout --detach FETCH_HEAD
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+      - name: Host-object and negative tests (GCC, three profiles)
+        run: CC=gcc sh rafcode/freestanding/verify.sh
+      - name: Host-object and negative tests (Clang, three profiles)
+        run: CC=clang sh rafcode/freestanding/verify.sh
+      - name: Cross-compile ARMv7 and AArch64 object contracts
+        run: sh rafcode/freestanding/verify_cross.sh
+      - name: Source identity receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "## RAFCODE freestanding L1 structural receipt" >> "$GITHUB_STEP_SUMMARY"
+          echo "source_sha=$SOURCE_SHA" >> "$GITHUB_STEP_SUMMARY"
+          find rafcode/freestanding -type f -print0 | sort -z | xargs -0 sha256sum >> "$GITHUB_STEP_SUMMARY"
+          echo "runtime_android=TOKEN_VAZIO; cryptographic_validation=TOKEN_VAZIO; license_review=PENDING; claim_allowed=false" >> "$GITHUB_STEP_SUMMARY"
