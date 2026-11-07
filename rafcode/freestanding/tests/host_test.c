@@ -36,7 +36,7 @@ int main(void)
     if (raf_fs_encode(&st, raw, 24u) != 24u) return 18;
     if (raw[0] != 0x31u || raw[1] != 0x46u
         || raw[2] != 0x41u || raw[3] != 0x52u) return 19;
-    raf_fs_init(&restored, 0u);
+    raf_fs_init(&restored, 3u);
     if (!raf_fs_decode(&restored, raw, 24u)) return 20;
     if (!same(&restored, &st)) return 21;
     snapshot = restored;
@@ -49,6 +49,15 @@ int main(void)
     raw[8] = 1u;
     if (!same(&restored, &snapshot)) return 25;
     if (raf_fs_decode(&restored, raw, 23u)) return 26;
+    /* Wire may not elevate receiver capability mask or rewind generation. */
+    raw[4] = 7u;
+    if (raf_fs_decode(&restored, raw, 24u)) return 34;
+    raw[4] = 3u;
+    if (!same(&restored, &snapshot)) return 35;
+    raw[16] = 0u;
+    if (raf_fs_decode(&restored, raw, 24u)) return 36;
+    raw[16] = 3u;
+    if (!same(&restored, &snapshot)) return 37;
     for (i = 0u; i < 24u; ++i) raw[i] = 0u;
     if (raf_fs_decode(&restored, raw, 24u)) return 27;
     if (!same(&restored, &snapshot)) return 28;
